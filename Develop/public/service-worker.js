@@ -62,6 +62,8 @@ self.addEventListener("fetch", event => {
     })
     );
 }); 
+
+// CLASS ACTIVITY CODE THAT DOESN'T WORK IN THIS SITUATION 
 // self.addEventListener("fetch", event => {
 //   if (event.request.url.startsWith(self.location.origin)) {
 //     event.respondWith(
