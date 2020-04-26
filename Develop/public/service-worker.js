@@ -1,43 +1,43 @@
-import { response } from "express";
-
+//array of data to cache 
 const FILES_TO_CACHE = [
     "/",
     "/index.js",
     "/manifest.webmanifest",
-    "/style.css",
+    "/styles.css",
     "/icons/icon-192x192.png",
     "/icons/icon-512x512.png",
-
+    "/indexDB.js"
 ];
-
+//run time and cache data 
 const PRECACHE = "precache-v1";
 const RUNTIME = "runtime";
-
+//install service worker
 self.addEventListener("install", event => {
     event.waitUntil(
-        cashes.open(PRECACHE)
-            .then(cache => cache.addALL(FILES_TO_CACHE))
+        caches.open(PRECACHE)
+            .then(cache => cache.addAll(FILES_TO_CACHE))
             .then(self.skipWaiting())
     );
 });
-
+//when the service worker starts add precached data
 self.addEventListener("activate", event => {
     const currentCashes = [PRECACHE, RUNTIME];
     event.waitUntil(
-        cashes.keys() / then(cacheNames => {
+        caches.keys().then(cacheNames => {
             return cacheNames.filter(cacheName => !currentCashes.includes(cacheName));
-        }).then(cashesToDelete => {
-            return Promise.all(cashesToDelete.map(casheToDelete => {
-                return cashes.delete(casheToDelete)
+        }).then(cachesToDelete => {
+            return Promise.all(cachesToDelete.map(cacheToDelete => {
+                return cashes.delete(cacheToDelete)
             }));
         }).then(() => self.clients.claim())
     );
 });
 
+// fetch request - if error store data 
 self.addEventListener("fetch", event => {
     if (event.request.url.includes("/api/")) {
         event.respondWith(
-            cashes.open(RUNTIME).then(cache => {
+            caches.open(RUNTIME).then(cache => {
                 return fetch(event.request).then(
                     response => {
                         if (response.status === 200) {//good repsonse  
@@ -52,13 +52,32 @@ self.addEventListener("fetch", event => {
         return;
     }
     event.respondWith(fetch(event.request).catch(() => {
-        return cashes.match(event.request).then((resposne) => {
+        return caches.match(event.request).then((response) => {
             if (respsonse) {
                 return response;
             } else if (event.request.headers.get("accept").includes("text/html")) {
-                return cashes.match("/");
+                return caches.match("/");
             }
         }); 
     })
     );
 }); 
+// self.addEventListener("fetch", event => {
+//   if (event.request.url.startsWith(self.location.origin)) {
+//     event.respondWith(
+//       caches.match(event.request).then(cachedResponse => {
+//         if (cachedResponse) {
+//           return cachedResponse;
+//         }
+
+//         return caches.open(RUNTIME).then(cache => {
+//           return fetch(event.request).then(response => {
+//             return cache.put(event.request, response.clone()).then(() => {
+//               return response;
+//             });
+//           });
+//         });
+//       })
+//     );
+//   }
+// });

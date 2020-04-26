@@ -1,3 +1,13 @@
+//add service worker on startup 
+if("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js")
+    .then(req => {
+      console.log("Servicee worker added: ", req)
+    })
+  })
+}
+
 let transactions = [];
 let myChart;
 
